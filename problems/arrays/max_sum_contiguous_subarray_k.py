@@ -65,11 +65,29 @@ print(max_sum_contiguous_subarray_k_sliding_window([1, 2, 3, 4, 5], 3))
 # Time Complexity: O(n)
 # Space Complexity: O(1)
 
-# Follow-up Questions: 
+'''Follow-up Questions: 
 # 1. What if the window size can be at most k?
-
+Problem statement: maximum sum of a subarray where the subarray can have at most K elements.
+'''
 # This is a prefix-sum + deque problem. (advanced sliding window problem)
 from collections import deque
+
+# Ok understood
+def max_sum_contiguous_subarray_k_prefix_sum_deque(nums, k):
+    prefix = 0
+    max_sum = float('-inf')
+    dq = deque()
+    dq.append((0, 0)) #index, prefix_sum
+    for i in range(1, n+1):
+        prefix += nums[i-1]
+        while dq and dq[0][0] < i - k:
+            dq.popleft()
+        max_sum = max(max_sum, prefix - dq[0][1])
+        while dq and dq[-1][1] > prefix:
+            dq.pop()
+        dq.append((i, prefix))
+    return max_sum
+
 
 def max_sum_contiguous_subarray_k_prefix_sum_deque(nums, k):
     prefix = 0
@@ -79,7 +97,17 @@ def max_sum_contiguous_subarray_k_prefix_sum_deque(nums, k):
     for i in range(1, n + 1):
         prefix += nums[i - 1]
 
-        # Ensure window size is at most k
+        # Ensure window size is at most k. We are managing a sliding window of valid prefix indices
+        # Explanations:
+        # Any subarray sum from index j to i-1 is prefix[i] - prefix[j]
+        # There's a constraint:
+        # i - j <= k  <=>  j >= i - k
+        # So while i -j > k <=> j < i - k, we remove the leftmost element
+        
+        # For each i, find the smallest prefix[j] where j >= k
+        # Because:
+        # - Bigger prefix[i]
+        # - Minus smallest possible prefix before it = maximum subarray sum
         while dq and dq[0][0] < i - k:
             dq.popleft()
 
@@ -87,6 +115,8 @@ def max_sum_contiguous_subarray_k_prefix_sum_deque(nums, k):
         max_sum = max(max_sum, prefix - dq[0][1])
 
         # Maintain increasing prefix sums
+        # A larger prefix sum is always worse for future subarrays
+        # So we want to pop from the back if it's bigger than the current prefix sum
         while dq and dq[-1][1] < prefix:
             dq.pop()
         dq.append((i, prefix))
@@ -100,6 +130,95 @@ def max_sum_contiguous_subarray_k_prefix_sum_deque(nums, k):
 # 2) Old indices are removed to enforce <= k constraint
 # 3) The smallest prefix sum gives the largest subarray sum
 
+# Examples:
+# 1) To understand:
+# while dq and dq[-1][1] < prefix:
+#     dq.pop()
+# dq.append((i, prefix))
+
+# prefix sums so far:
+# index : 0 1 2 3
+# prefix: 0 5 3 7
+# if we keep (1, 5):, it will never produce a better result than (2, 3)
+# it is older AND larger
+# so we delete it
+#This is why we keep the deque monotonically increasing
+
+# The deque stores: Best possible starting points for future subarrays
+# Invariants:
+# 1) Indices are increasing
+# 2) Prefix sums are increasing
+# 3) All indices are within k of current i
+# Because of this:
+# - Front =  best prefix to substract
+# - Back = worse candidates we can discard
+
+# Full Algorithm
+# For each index i:
+# 1. Remove prefixes that are too old (length > k)
+# 2. Compute best subarray ending at i
+# 3. Remove worse prefix sums from the back
+# 4. Add current prefix
+
+# for each i we want:
+# prefix[i] - min(prefix[j]) where j ∈ [i-k, i-1]
+
+# Why the Deque Exists:
+# We need to:
+# - Slide the valid range [i-k, i-1]
+# - Query the minimum prefix in that range
+# - Do it in O(1) per step
+
+# A deque gives us:
+# O(1) front access (minimum)
+# O(1) amortized insert/delete
+# Order + efficiency
+
+# I have just noticed that by writing j ∈ [i-k, i-1]
+# It's obvious that if j < i-k, the indices/prefixes are too old
+# it would create a subarray longer than k
+# so this enforces length <= k
 
 
+# while dq and dq[-1][1] < prefix:
+# this prefix is worse than the current one for all future subarrays
+# Why?
+# Larger prefix --> smaller difference
+# Older index --> expires sonner
+# So it's strictly dominated
 
+# 5. Mental Shortcut:
+# a) maximum subarray sum + length constraint
+# --> Think prefix sums + monotonic deque
+# b) no lenght constraint
+# --> Think Kadane
+
+# For prefix sums, smaller is always better
+
+# Sliding Window Patterns:
+# 1. Fixed-size window --> exactly k, simple sum, optional indices
+# 2. Dynamic-size window --> variable length, positive numbers, min-length or max-length variants
+# 3. Prefix + deque --> at most k, negative numbers, max sum with indices
+
+# Don't care about order/contiguity --> Heap
+# Contiguous subarrays + sliding window + monotonic tracking --> Deque
+
+
+# 1. Always ask about constraints:
+# Can nums be negative?
+# Maximum length/k?
+# Output sum only or indices?
+
+# 2. Pick data structure by pattern:
+# Fixed-size / positive dynamic --> pointers only
+# Negative numbers / at most k --> deque
+# Need arbitrary order / max/min anywhere --> heap
+
+# 3. While-loop when window is dynamic: iterate until invariant breaks
+
+# 4. Deque front = best candidate, deque back = dominated, removed
+
+# 1-min mnemonic
+# "Pointers for fixed, while for dynamic, deque for negative/at-most, Kadane for unlimited, heap only when order doesn't matter"
+
+#  
