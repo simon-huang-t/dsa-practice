@@ -5,3 +5,5 @@ def prefix_sum(nums):
         prefix_sum[i + 1] = prefix_sum[i] + nums[i]
     return prefix_sum
 
+# To calculate the sum of a subarray between indexes i and j
+# prefix[j + 1] - prefix[i]
