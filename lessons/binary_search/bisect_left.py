@@ -1,11 +1,25 @@
+# Returns first index where value ≥ x.
 def bisect_left(arr, x):
-    low, high = 0, len(arr)
+    left, right = 0, len(arr) - 1
     
-    while low < high:
-        mid = (low + high) // 2
+    while left <= right:
+        mid = (left + right) // 2
         if arr[mid] < x:
-            low = mid + 1
+            left = mid + 1
         else:
-            high = mid
+            right = mid - 1
     
-    return low
+    return left
+
+# Returns first index where value > x.
+def bisect_right(arr, x):
+    left, right = 0, len(arr) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] <= x: # Here is the difference
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return left
