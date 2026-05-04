@@ -1,8 +1,9 @@
 '''
-Dijkstra's algorithm is a graph search algorithm that finds 
-the shortest path between nodes in a graph. 
+Dijkstra's algorithm is a graph search algorithm that finds
+the shortest path between nodes in a graph.
 It is a greedy algorithm and works on weighted graphs.
 '''
+import heapq
 
 def dijkstra(graph, start):
     n = len(graph)
@@ -19,4 +20,23 @@ def dijkstra(graph, start):
                 heapq.heappush(pq, (dist[v], v))
     return dist
 
-    
+# --- TEST CASE ---
+
+# Graph Structure:
+# 0 --(4)--> 1
+# 0 --(1)--> 2
+# 2 --(2)--> 1
+# 1 --(5)--> 3
+# 2 --(8)--> 3
+
+graph = {
+    0: [(1, 4), (2, 1)],
+    1: [(3, 5)],
+    2: [(1, 2), (3, 8)],
+    3: []
+}
+
+start_node = 0
+distances = dijkstra(graph, start_node)
+
+print(f"Shortest distances from node {start_node}: {distances}")
